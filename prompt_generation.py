@@ -11,6 +11,7 @@ Be sure to follow these steps to complete the task successfully:
 4. Avoid duplicating tests that have already been written, especially those that have failed in previous iterations.
 5. Ensure that each test is independent, isolated, and does not rely on the state of other tests.
 6. If the original test file contains a test suite, integrate the new tests into it, maintaining consistency in style, naming conventions, and structure.
+7. Make sure each test only calls a function once and that only one assertion is made per test function.
 """
   source_file_prompt = f"""`Source File`
 Here is the source file which you will be writing tests for, with line numbers added manually for easier comprehension: {source_file_name}.
@@ -36,7 +37,7 @@ There are no test files provided. You will be writing tests for the source file 
   if len(failed_tests) > 0:
     failed_tests_prompt = f"""
 `Previous Iterations Failed Tests`
-Below is a list of failed tests that you generated in previous iterations. Do not generate the same tests again, and take the failed tests into account when generating new tests.
+Below is a list of failed tests or tests that didn't improve coverage that you generated in previous iterations. Do not generate the same tests again, and take the failed tests into account when generating new tests.
 ```
 """
     for failed_test in failed_tests:
