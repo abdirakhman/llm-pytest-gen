@@ -27,7 +27,7 @@ def parse_json(message):
   # find last line that ends with ```
   # return the content between those two lines
   print(message)
-  lines = message.split("\n")
+  lines = message.replace('"""', '"').split("\n")
   start = -1
   end = -1
   for i, line in enumerate(lines):
@@ -96,33 +96,33 @@ for dependency in dependencies:
 failed_tests = []
 
 iteration = 0
+# Only read file once before the iterations
+previous_test_code = ""
+with open(testFilePath, "r") as f:
+  previous_test_code = f.read()
+
 while iteration < 100:
   iteration += 1
   coverage_report = coverage_gatherer.main(projectPath, testFilePath, sourceCode)
   print(coverage_report)
-  if get_coverage_percentage(coverage_report) == 100:
-    break
   print(f"ITERATION: {iteration}")
   prompt = (prompt_generation.prompt_generation(sourceCode, source_file_numbered, tests_files, os.path.basename(testFilePath) , failed_tests, additional_includes, coverage_report))
   created_tests = parse_json(llm_chat.get_response(prompt))
   if created_tests == None:
     continue
-  previous_test_code = ""
-  good_test_found = 0
-  with open(testFilePath, "r") as f:
-    previous_test_code = f.read()
+  
   for test in created_tests:
     test_code = create_code(test["imports"], test["test_code"], previous_test_code)
     with open(testFilePath, "w") as f:
       f.write(test_code)
+    # print(test_code)
     cr = coverage_gatherer.main(projectPath, testFilePath, sourceCode)
-    if cr == None:
-      continue
     if get_coverage_percentage(cr) > get_coverage_percentage(coverage_report):
-      good_test_found = 1
-      break
+      previous_test_code = test_code
+      coverage_report = cr
+      if get_coverage_percentage(coverage_report) == 100:
+        exit(0)
     else:
       failed_tests.append(test_code)
-  if not good_test_found:
-    with open(testFilePath, "w") as f:
-      f.write(previous_test_code)
+      with open(testFilePath, "w") as f:
+        f.write(previous_test_code)
