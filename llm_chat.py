@@ -2,13 +2,8 @@ import ollama
 from openai import OpenAI
 
 def get_response(message):
-  response = ollama.chat(model='llama3', messages=[
-    {
-      'role': 'user',
-      'content': message,
-    },
-  ])
-  return (response['message']['content'])
+  response = ollama.generate(model='llama3', prompt=message)
+  return (response['response'])
 
 def get_response_openai(message):
   client = OpenAI()
