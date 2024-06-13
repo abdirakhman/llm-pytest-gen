@@ -23,8 +23,9 @@ pip install -r requirements.txt
 ```
 3. **Generate unit tests**
 ```bash
-python main.py  PROJECT_PATH/test/TEST_FILE.py PROJECT_PATH FILE.py
+python main.py LLM_TYPE PROJECT_PATH/test/TEST_FILE.py PROJECT_PATH FILE.py
 ```
+Current supported LLMs are llama3 and gpt-4o.
 ## Demo
 Watch our demo video to see the tool in action: [YouTube Demo](https://youtu.be/1oiCwrImODI).
 
