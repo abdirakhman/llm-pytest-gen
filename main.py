@@ -37,10 +37,8 @@ def parse_json(message):
       else:
         end = i
         break
-  # print(lines)
   if start == -1 or end == -1:
     return None
-  # print("\n".join(lines[start+1:end]))
   try:
     tests_created = json.loads("\n".join(lines[start+1:end]), strict=False)
     return tests_created
@@ -58,9 +56,10 @@ def get_coverage_percentage(cr):
     return 0
   return float(cr.split("\n")[0].split()[-1][:-1])
 
-testFilePath = sys.argv[1]
-projectPath = sys.argv[2]
-sourceCode = sys.argv[3]
+llm_type = sys.argv[1]
+testFilePath = sys.argv[2]
+projectPath = sys.argv[3]
+sourceCode = sys.argv[4]
 
 generated_test_file_path = os.path.join(os.path.dirname(testFilePath), os.path.basename(testFilePath).split(".")[0] + "_tmp.py")
 
@@ -91,7 +90,6 @@ for dependency in dependencies:
   d["file_name"] = file_name
   d["code"] = code
   additional_includes.append(d)
-  print(d)
 
 failed_tests = []
 
@@ -107,15 +105,13 @@ while iteration < 100:
   print(coverage_report)
   print(f"ITERATION: {iteration}")
   prompt = (prompt_generation.prompt_generation(sourceCode, source_file_numbered, tests_files, os.path.basename(testFilePath) , failed_tests, additional_includes, coverage_report))
-  created_tests = parse_json(llm_chat.get_response(prompt))
+  created_tests = parse_json(llm_chat.get_response(prompt, llm_type))
   if created_tests == None:
     continue
-  
   for test in created_tests:
     test_code = create_code(test["imports"], test["test_code"], previous_test_code)
     with open(testFilePath, "w") as f:
       f.write(test_code)
-    # print(test_code)
     cr = coverage_gatherer.main(projectPath, testFilePath, sourceCode)
     if get_coverage_percentage(cr) > get_coverage_percentage(coverage_report):
       previous_test_code = test_code
